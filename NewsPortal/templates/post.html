@@ -1,0 +1,36 @@
+{% extends 'flatpages/default.html' %}
+
+{% load custom_filters %}
+
+{% block title %}
+Post
+{% endblock title %}
+
+{% block content %}
+<b><a href="/news">На главную</a></b>
+<br>
+<table>
+    <thread>
+        <th>
+            Заголовок
+        </th>
+        <th>
+            Текст поста
+        </th>
+        <th>
+            Время добавления
+        </th>
+    </thread>
+    <tr>
+        <td>
+            {{ post.header|sensor }}
+        </td>
+        <td>
+            {{ post.text|sensor }}
+        </td>
+        <td>
+            <h4>{{ post.time_add | date:'d M Y' }}</h4>
+        </td>
+    </tr>
+</table>
+{% endblock content %}
