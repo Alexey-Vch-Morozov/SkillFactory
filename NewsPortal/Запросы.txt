@@ -1,0 +1,116 @@
+
+
+
+from portal.models import * 
+from django.db.models import Sum
+
+1. Создать двух пользователей с помощью метода User.objects.create_user('username') 
+>>> user1 = User.objects.create_user('Иванов') 
+>>> user1.save() 
+>>> user2 = User.objects.create_user('Петров') 
+>>> user2.save() 
+
+2. Создать 2 объекта модели Author, связанные с пользователями
+>>> author1 = Author(author = User(1)) 
+>>> author1.save()                     
+>>> author2 = Author(author = User(2)) 
+>>> author2.save() 
+
+3. Добавить 4 категории в модель Category
+>>> cat1 = Category(category = "Спорт") 
+>>> cat1.save() 
+>>> cat2 = Category(category = "Техника") 
+>>> cat2.save() 
+>>> cat3 = Category(category = "Погода")  
+>>> cat3.save() 
+>>> cat4 = Category(category = "Музыка")  
+>>> cat4.save() 
+
+4. Добавить 2 статьи и новость.
+>>> post1 = Post(author = Author(1), category_selector = 'N', header = 'Заголовок первого поста', text = 'Текст первого поста') 
+>>> post2 = Post(author = Author(1), category_selector = 'A', header = 'Заголовок первой статьи', text = 'Текст первой статьи')
+>>> post2.save() 
+>>> post3 = Post(author = Author(2), category_selector = 'A', header = 'Заголовок второй статьи', text = 'Текст второй статьи') 
+>>> post3.save()
+
+5. Присвоить им категории (как минимум в одной статье/новости должно быть не меньше 2 категорий)
+>>> post1category = PostCategory(post = Post(1), category = Category(1)) 
+>>> post1category.save()                                                 
+>>> post1_2category = PostCategory(post = Post(1), category = Category(3)) 
+>>> post1_2category.save() 
+>>> post2category = PostCategory(post = Post(2), category = Category(4)) 
+>>> post2category.save() 
+>>> post3category = PostCategory(post = Post(3), category = Category(2)) 
+>>> post3category.save() 
+
+6. Создать как минимум 4 комментария к разным объектам модели Post (в каждом объекте должен быть минимум один комментарий)
+>>> comment1 = Comment(post = Post(1), user = User(1), comment_text = "Первый комментарий к посту 1 пользователя 1") 
+>>> comment1.save() 
+>>> comment2 = Comment(post = Post(1), user = User(1), comment_text = "Второй комментарий к посту 1 пользователя 1") 
+>>> comment2.save() 
+>>> comment3 = Comment(post = Post(1), user = User(2), comment_text = "Третий комментарий к посту 1 пользователя 2") 
+>>> comment3.save() 
+>>> comment4 = Comment(post = Post(2), user = User(1), comment_text = "Комментрий пользователя 1 к посту 2")                                            
+>>> comment4.save() 
+>>> comment5 = Comment(post = Post(3), user = User(2), comment_text = "Комментрий пользователя 2 к посту 3") 
+>>> comment5.save() 
+
+7. Применяя функции like(), dislike() к статьям/новостям и комментарями скорректировать рейтинги этих объектов
+>>> x = Comment.objects.get(pk=1)
+>>> x.like()
+>>> x.dislike()
+>>> Comment.objects.get(pk=1).like() #Второй вариант применения метода лайк
+>>> Comment.objects.get(pk=1).dislike()
+>>> Comment.objects.get(pk=2).like()
+>>> Comment.objects.get(pk=2).dislike()
+>>> Comment.objects.get(pk=3).like()
+>>> Comment.objects.get(pk=3).dislike()
+>>> Comment.objects.get(pk=4).like()
+>>> Comment.objects.get(pk=4).dislike()
+
+8. Обновить рейтинги пользователей
+Не знаю как сделать метод, в следующем модуле доделаю
+
+9.Вывести username и рейтинг лучшего пользователя (применяя сортировку и возвращая поля первого объекта).
+>>>  
+{'username': 'Иванов', 'author__author_rating': 50} 
+10.Вывести дату добавления, username автора, рейтинг, заголовок и превью лучшей статьи.
+>>> Post.objects.all().filter(category_selector = 'A').order_by('-post_rating').values('time_add','author__author_id__username','post_rating', 'header')[0] 
+{'time_add': datetime.datetime(2022, 5, 23, 10, 47, 32, 746276, tzinfo=datetime.timezone.utc), 'author__author_id__username': 'Петров', 'post_rating': 14, 'header': 'Заголовок второй статьи'} 
+
+>>>a = Post.objects.all().filter(category_selector = 'A').order_by('-post_rating').values('id')[0]
+>>>b = list(a.values())[0]   # В переменную б записываем идентификатор нужного поста
+>>>Post.objects.get(pk=b).preview() #Получаем preview поста с нужным идентификатором
+'Текст второй статьи...' 
+
+11. Вывести все комментарии(дата, пользователь, рейтинг, текст) к этой статье
+>>> Comment.objects.all().filter(post = c).values('time_add', 'user__username', 'comment_rating', 'comment_text')  
+<QuerySet [{'time_add': datetime.datetime(2022, 5, 23, 11, 19, 33, 945809, tzinfo=datetime.timezone.utc), 'user__username': 'Петров', 'comment_rating': 2, 'comment_text': 'Комментрий пользователя 2 к посту 3'}, {'time_add': datetime.da
+tetime(2022, 5, 24, 19, 19, 2, 363772, tzinfo=datetime.timezone.utc), 'user__username': 'Иванов', 'comment_rating': 0, 'comment_text': 'Комментрий пользователя 1 к посту 3'}]>
+
+
+Post.objects.all().values('header', 'postcategory__category__category') 
+'Первый пост про непонятно что', 'postcategory__category__category': 'Погода'}, 
+{'header': 'Статья номер один про китайскую машинку', 'postcategory__category__category': 'Музыка'}, 
+{'header': 'Статья номер 2 про города-миллионники', 'postcategory__category__category': 'Техника'}
+username
+
+>>> Author.objects.all().values('author', 'author_rating') 
+<QuerySet [{'author': 1, 'author_rating': 50}, {'author': 2, 'author_rating': 0}]> 
+
+>>> Post.objects.all().values('author__author_id__username', 'post_rating') 
+<QuerySet [{'author__author_id__username': 'Иванов', 'post_rating': 14}
+
+
+>>> Post.objects.filter(author_id=2).aggregate(Sum('post_rating')) 
+{'post_rating__sum': 16} 
+>>> Post.objects.filter(author_id=1).aggregate(Sum('post_rating')) 
+{'post_rating__sum': 22} 
+
+>>> Comment.objects.filter(user__username='Иванов').aggregate(Sum('comment_rating')) 
+{'comment_rating__sum': 83} 
+>>> Comment.objects.filter(user__username='Петров').aggregate(Sum('comment_rating')) 
+{'comment_rating__sum': 6} 
+
+
+
