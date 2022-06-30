@@ -1,0 +1,14 @@
+{% extends 'flatpages/default.html' %}
+ 
+{% block title %} Posts {% endblock title %}
+ 
+{% block content %}
+<b><a href="/news">На главную</a></b>
+<br>
+<h3>Информация поста</h3>
+<form method="POST">
+    {% csrf_token %} 
+    {{ form }}
+    <input type="submit" value="Добавить пост">
+</form>
+{% endblock content %}
